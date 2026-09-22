@@ -94,6 +94,47 @@ class ProductModel extends Equatable {
     };
   }
 
+  Map<String, dynamic> toSqliteMap() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'category': category,
+      'price': price,
+      'discountPercentage': discountPercentage,
+      'rating': rating,
+      'stock': stock,
+      'brand': brand,
+      'images': images.join(','),
+      'thumbnail': thumbnail,
+      'warrantyInformation': warrantyInformation,
+      'shippingInformation': shippingInformation,
+      'returnPolicy': returnPolicy,
+    };
+  }
+
+  factory ProductModel.fromSqliteMap(Map<String, dynamic> map) {
+    final imagesStr = map['images'] as String? ?? '';
+    final imagesList = imagesStr.isEmpty ? <String>[] : imagesStr.split(',');
+
+    return ProductModel(
+      id: map['id'] as int? ?? 0,
+      title: map['title'] as String? ?? '',
+      description: map['description'] as String? ?? '',
+      category: map['category'] as String? ?? '',
+      price: (map['price'] as num?)?.toDouble() ?? 0.0,
+      discountPercentage: (map['discountPercentage'] as num?)?.toDouble() ?? 0.0,
+      rating: (map['rating'] as num?)?.toDouble() ?? 0.0,
+      stock: (map['stock'] as num?)?.toInt() ?? 0,
+      brand: map['brand'] as String?,
+      images: imagesList,
+      thumbnail: map['thumbnail'] as String? ?? '',
+      warrantyInformation: map['warrantyInformation'] as String? ?? '1 year standard warranty',
+      shippingInformation: map['shippingInformation'] as String? ?? 'Ships in 1-2 business days',
+      returnPolicy: map['returnPolicy'] as String? ?? '30 days return policy',
+    );
+  }
+
   @override
   List<Object?> get props => [
         id,
