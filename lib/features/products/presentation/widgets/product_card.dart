@@ -2,8 +2,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../cart/logic/cart_cubit.dart';
 import '../../../cart/logic/cart_state.dart';
+import '../../../main_navigation_screen.dart';
 import '../../../wishlist/logic/wishlist_cubit.dart';
 import '../../../wishlist/logic/wishlist_state.dart';
 import '../../data/models/product_model.dart';
@@ -115,6 +117,12 @@ class ProductCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(20),
                             onTap: () {
                               context.read<WishlistCubit>().toggleWishlist(product);
+                              AppToast.showWishlist(
+                                context: context,
+                                product: product,
+                                isAdded: !isFav,
+                                onViewWishlist: () => MainNavigationScreen.switchTab(context, 1),
+                              );
                             },
                             child: Container(
                               padding: const EdgeInsets.all(6),
@@ -228,12 +236,10 @@ class ProductCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(10),
                             onTap: () {
                               context.read<CartCubit>().addToCart(product);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Added "${product.title}" to cart'),
-                                  duration: const Duration(seconds: 1),
-                                  behavior: SnackBarBehavior.floating,
-                                ),
+                              AppToast.showAddToCart(
+                                context: context,
+                                product: product,
+                                onViewCart: () => MainNavigationScreen.switchTab(context, 2),
                               );
                             },
                             child: Container(

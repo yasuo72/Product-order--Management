@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:product_order_app/core/constants/app_colors.dart';
+import 'package:product_order_app/core/widgets/app_toast.dart';
 import 'package:product_order_app/core/widgets/custom_button.dart';
 import 'package:product_order_app/core/widgets/custom_text_field.dart';
 import 'package:product_order_app/features/auth/logic/auth_cubit.dart';
@@ -99,13 +100,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
           );
         } else if (state is CheckoutFailure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: AppColors.error,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
+          AppToast.showError(context, state.message);
         }
       },
       child: Scaffold(

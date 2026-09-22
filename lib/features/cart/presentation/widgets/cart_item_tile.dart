@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../data/models/cart_item_model.dart';
 import '../../logic/cart_cubit.dart';
 
@@ -23,12 +24,10 @@ class CartItemTile extends StatelessWidget {
       direction: DismissDirection.endToStart,
       onDismissed: (_) {
         context.read<CartCubit>().removeFromCart(product.id);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Removed "${product.title}" from cart'),
-            duration: const Duration(seconds: 2),
-            behavior: SnackBarBehavior.floating,
-          ),
+        AppToast.showRemovedFromCart(
+          context: context,
+          product: product,
+          onUndo: () => context.read<CartCubit>().addToCart(product),
         );
       },
       background: Container(

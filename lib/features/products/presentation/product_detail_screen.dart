@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:product_order_app/core/constants/app_colors.dart';
+import 'package:product_order_app/core/widgets/app_toast.dart';
 import 'package:product_order_app/core/widgets/error_state_view.dart';
 import 'package:product_order_app/features/cart/logic/cart_cubit.dart';
 import 'package:product_order_app/features/cart/logic/cart_state.dart';
+import 'package:product_order_app/features/main_navigation_screen.dart';
 import 'package:product_order_app/features/products/data/product_repository.dart';
 import 'package:product_order_app/features/products/logic/product_detail_cubit.dart';
 import 'package:product_order_app/features/products/logic/product_detail_state.dart';
@@ -162,6 +164,15 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                     ),
                     onPressed: () {
                       context.read<WishlistCubit>().toggleWishlist(product);
+                      AppToast.showWishlist(
+                        context: context,
+                        product: product,
+                        isAdded: !isFav,
+                        onViewWishlist: () {
+                          Navigator.of(context).popUntil((route) => route.isFirst);
+                          MainNavigationScreen.switchTab(context, 1);
+                        },
+                      );
                     },
                   );
                 },
@@ -491,11 +502,14 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                         Expanded(
                           child: ElevatedButton.icon(
                             onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Item is already in your cart'),
-                                  duration: Duration(seconds: 1),
-                                ),
+                              AppToast.showInfo(
+                                context,
+                                'Item is already in your cart',
+                                actionLabel: 'VIEW CART',
+                                onAction: () {
+                                  Navigator.of(context).popUntil((route) => route.isFirst);
+                                  MainNavigationScreen.switchTab(context, 2);
+                                },
                               );
                             },
                             icon: const Icon(Icons.check_circle_rounded),
@@ -517,16 +531,13 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                     child: ElevatedButton.icon(
                       onPressed: () {
                         context.read<CartCubit>().addToCart(product);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Added "${product.title}" to cart'),
-                            action: SnackBarAction(
-                              label: 'VIEW CART',
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                            ),
-                          ),
+                        AppToast.showAddToCart(
+                          context: context,
+                          product: product,
+                          onViewCart: () {
+                            Navigator.of(context).popUntil((route) => route.isFirst);
+                            MainNavigationScreen.switchTab(context, 2);
+                          },
                         );
                       },
                       icon: const Icon(Icons.shopping_bag_outlined),

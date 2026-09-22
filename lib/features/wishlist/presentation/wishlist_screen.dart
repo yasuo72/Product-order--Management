@@ -2,8 +2,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:product_order_app/core/constants/app_colors.dart';
+import 'package:product_order_app/core/widgets/app_toast.dart';
 import 'package:product_order_app/core/widgets/empty_state_view.dart';
 import 'package:product_order_app/features/cart/logic/cart_cubit.dart';
+import 'package:product_order_app/features/main_navigation_screen.dart';
 import 'package:product_order_app/features/products/presentation/product_detail_screen.dart';
 import '../logic/wishlist_cubit.dart';
 import '../logic/wishlist_state.dart';
@@ -62,11 +64,11 @@ class WishlistScreen extends StatelessWidget {
                     context.read<CartCubit>().addToCart(item);
                   }
                   context.read<WishlistCubit>().clearWishlist();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('All items moved to your cart!'),
-                      behavior: SnackBarBehavior.floating,
-                    ),
+                  AppToast.showSuccess(
+                    context,
+                    'All saved items moved to your cart! 🛍️',
+                    actionLabel: 'VIEW CART',
+                    onAction: () => MainNavigationScreen.switchTab(context, 2),
                   );
                 },
                 icon: const Icon(Icons.shopping_bag_outlined, size: 16),
@@ -124,12 +126,10 @@ class WishlistScreen extends StatelessWidget {
                       direction: DismissDirection.endToStart,
                       onDismissed: (_) {
                         context.read<WishlistCubit>().removeFromWishlist(product.id);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Removed "${product.title}" from wishlist'),
-                            duration: const Duration(seconds: 2),
-                            behavior: SnackBarBehavior.floating,
-                          ),
+                        AppToast.showWishlist(
+                          context: context,
+                          product: product,
+                          isAdded: false,
                         );
                       },
                       background: Container(
@@ -239,12 +239,10 @@ class WishlistScreen extends StatelessWidget {
                                           onPressed: () {
                                             context.read<CartCubit>().addToCart(product);
                                             context.read<WishlistCubit>().removeFromWishlist(product.id);
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(
-                                                content: Text('Moved "${product.title}" to cart'),
-                                                duration: const Duration(seconds: 1),
-                                                behavior: SnackBarBehavior.floating,
-                                              ),
+                                            AppToast.showItemMovedToCart(
+                                              context: context,
+                                              product: product,
+                                              onViewCart: () => MainNavigationScreen.switchTab(context, 2),
                                             );
                                           },
                                           icon: const Icon(Icons.shopping_bag_outlined, size: 14),
