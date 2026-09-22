@@ -33,7 +33,7 @@ class CustomButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor ?? AppColors.primary,
           foregroundColor: textColor ?? Colors.white,
-          disabledBackgroundColor: (backgroundColor ?? AppColors.primary).withOpacity(0.6),
+          disabledBackgroundColor: (backgroundColor ?? AppColors.primary).withAlpha(150),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           elevation: 0,
         ),

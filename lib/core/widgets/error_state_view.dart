@@ -22,7 +22,7 @@ class ErrorStateView extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppColors.error.withOpacity(0.1),
+                color: AppColors.error.withAlpha(25),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
