@@ -48,3 +48,6 @@ app.*.map.json
 *.apk
 .kotlin/
 
+# Private local notes
+INTERVIEW_GUIDE_HINGLISH.md
+
