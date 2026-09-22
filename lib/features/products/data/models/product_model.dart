@@ -12,6 +12,9 @@ class ProductModel extends Equatable {
   final String? brand;
   final List<String> images;
   final String thumbnail;
+  final String warrantyInformation;
+  final String shippingInformation;
+  final String returnPolicy;
 
   const ProductModel({
     required this.id,
@@ -25,6 +28,9 @@ class ProductModel extends Equatable {
     this.brand,
     required this.images,
     required this.thumbnail,
+    this.warrantyInformation = '1 year standard warranty',
+    this.shippingInformation = 'Ships in 1-2 business days',
+    this.returnPolicy = '30 days return policy',
   });
 
   double get discountedPrice {
@@ -34,21 +40,18 @@ class ProductModel extends Equatable {
   }
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
-    // Handle brand (some products might not have brand or have it null)
     final brandVal = json['brand'];
     String? brand;
     if (brandVal is String) {
       brand = brandVal;
     }
 
-    // Handle images list safely
     final rawImages = json['images'];
     List<String> imagesList = [];
     if (rawImages is List) {
       imagesList = rawImages.map((e) => e.toString()).toList();
     }
 
-    // Fallback thumbnail if empty
     String thumbnail = json['thumbnail'] as String? ?? '';
     if (thumbnail.isEmpty && imagesList.isNotEmpty) {
       thumbnail = imagesList.first;
@@ -66,6 +69,9 @@ class ProductModel extends Equatable {
       brand: brand,
       images: imagesList,
       thumbnail: thumbnail,
+      warrantyInformation: json['warrantyInformation'] as String? ?? '1 year standard warranty',
+      shippingInformation: json['shippingInformation'] as String? ?? 'Ships in 1-2 business days',
+      returnPolicy: json['returnPolicy'] as String? ?? '30 days return policy',
     );
   }
 
@@ -82,6 +88,9 @@ class ProductModel extends Equatable {
       'brand': brand,
       'images': images,
       'thumbnail': thumbnail,
+      'warrantyInformation': warrantyInformation,
+      'shippingInformation': shippingInformation,
+      'returnPolicy': returnPolicy,
     };
   }
 
@@ -98,5 +107,8 @@ class ProductModel extends Equatable {
         brand,
         images,
         thumbnail,
+        warrantyInformation,
+        shippingInformation,
+        returnPolicy,
       ];
 }

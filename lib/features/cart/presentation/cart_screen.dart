@@ -63,6 +63,7 @@ class CartScreen extends StatelessWidget {
                   showDialog(
                     context: context,
                     builder: (dialogCtx) => AlertDialog(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                       title: const Text('Clear Cart'),
                       content: const Text('Are you sure you want to remove all items from your cart?'),
                       actions: [
@@ -71,7 +72,10 @@ class CartScreen extends StatelessWidget {
                           child: const Text('Cancel'),
                         ),
                         ElevatedButton(
-                          style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.error,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
                           onPressed: () {
                             Navigator.pop(dialogCtx);
                             context.read<CartCubit>().clearCart();
@@ -99,16 +103,20 @@ class CartScreen extends StatelessWidget {
             );
           }
 
+          final freeShippingThreshold = 50.0;
+          final freeShippingProgress = (state.subtotal / freeShippingThreshold).clamp(0.0, 1.0);
+          final amountToFreeShipping = freeShippingThreshold - state.subtotal;
+
           return Column(
             children: [
               // User Isolation Notice
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                color: AppColors.primaryLight.withAlpha(30),
+                color: AppColors.primaryLight.withAlpha(25),
                 child: Row(
                   children: [
-                    const Icon(Icons.lock_outline_rounded, size: 16, color: AppColors.primary),
+                    const Icon(Icons.shield_outlined, size: 16, color: AppColors.primary),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -120,10 +128,52 @@ class CartScreen extends StatelessWidget {
                 ),
               ),
 
+              // Free Shipping Progress Tracker (Key Polish)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                color: isDark ? AppColors.darkCard : const Color(0xFFF8FAFC),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          amountToFreeShipping <= 0 ? Icons.check_circle_rounded : Icons.local_shipping_rounded,
+                          size: 16,
+                          color: amountToFreeShipping <= 0 ? AppColors.success : AppColors.primary,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          amountToFreeShipping <= 0
+                              ? '🎉 You have unlocked FREE shipping!'
+                              : 'Add \$${amountToFreeShipping.toStringAsFixed(2)} more for FREE shipping!',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: amountToFreeShipping <= 0 ? AppColors.success : (isDark ? Colors.white : Colors.black87),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: freeShippingProgress,
+                        minHeight: 5,
+                        backgroundColor: isDark ? Colors.white12 : Colors.black12,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          amountToFreeShipping <= 0 ? AppColors.success : AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
               // Items List
               Expanded(
                 child: ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
                   itemCount: state.items.length,
                   itemBuilder: (context, index) {
                     final item = state.items[index];
@@ -193,15 +243,19 @@ class CartScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Shipping Fee',
+                            'Estimated Shipping',
                             style: TextStyle(
                               color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
                               fontSize: 14,
                             ),
                           ),
                           Text(
-                            '\$${state.shippingFee.toStringAsFixed(2)}',
-                            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                            amountToFreeShipping <= 0 ? 'FREE' : '\$${state.shippingFee.toStringAsFixed(2)}',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: amountToFreeShipping <= 0 ? AppColors.success : null,
+                            ),
                           ),
                         ],
                       ),
@@ -216,7 +270,7 @@ class CartScreen extends StatelessWidget {
                             style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
                           ),
                           Text(
-                            '\$${state.totalAmount.toStringAsFixed(2)}',
+                            '\$${(amountToFreeShipping <= 0 ? state.subtotal : state.totalAmount).toStringAsFixed(2)}',
                             style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w900,
@@ -229,8 +283,8 @@ class CartScreen extends StatelessWidget {
 
                       // Checkout CTA
                       CustomButton(
-                        text: 'Proceed to Checkout',
-                        icon: Icons.arrow_forward_rounded,
+                        text: 'Proceed to Secure Checkout',
+                        icon: Icons.lock_outline_rounded,
                         onPressed: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(

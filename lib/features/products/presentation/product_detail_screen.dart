@@ -50,6 +50,61 @@ class _ProductDetailViewState extends State<ProductDetailView> {
     super.dispose();
   }
 
+  Widget _buildSpecCard({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required bool isDark,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkCard : Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withAlpha(25),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: AppColors.primary, size: 20),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? AppColors.darkTextMuted : AppColors.lightTextMuted,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -59,7 +114,9 @@ class _ProductDetailViewState extends State<ProductDetailView> {
         if (state is ProductDetailLoading || state is ProductDetailInitial) {
           return Scaffold(
             appBar: AppBar(),
-            body: const Center(child: CircularProgressIndicator()),
+            body: const Center(
+              child: CircularProgressIndicator(strokeWidth: 2.5),
+            ),
           );
         }
 
@@ -88,9 +145,20 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                 builder: (context, wishlistState) {
                   final isFav = wishlistState.isFavorite(product.id);
                   return IconButton(
-                    icon: Icon(
-                      isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                      color: isFav ? AppColors.error : null,
+                    icon: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: isDark ? AppColors.darkCard : Colors.white,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                        ),
+                      ),
+                      child: Icon(
+                        isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                        size: 20,
+                        color: isFav ? AppColors.error : null,
+                      ),
                     ),
                     onPressed: () {
                       context.read<WishlistCubit>().toggleWishlist(product);
@@ -98,6 +166,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                   );
                 },
               ),
+              const SizedBox(width: 8),
             ],
           ),
           body: SingleChildScrollView(
@@ -106,7 +175,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
               children: [
                 // Image Carousel
                 SizedBox(
-                  height: 300,
+                  height: 310,
                   width: double.infinity,
                   child: Stack(
                     alignment: Alignment.bottomCenter,
@@ -123,6 +192,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                               : product.thumbnail;
                           return Container(
                             color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+                            padding: const EdgeInsets.all(16),
                             child: CachedNetworkImage(
                               imageUrl: imgUrl,
                               fit: BoxFit.contain,
@@ -141,20 +211,27 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                       if (product.images.length > 1)
                         Positioned(
                           bottom: 12,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(
-                              product.images.length,
-                              (index) => AnimatedContainer(
-                                duration: const Duration(milliseconds: 250),
-                                margin: const EdgeInsets.symmetric(horizontal: 3),
-                                width: _currentImageIndex == index ? 20 : 6,
-                                height: 6,
-                                decoration: BoxDecoration(
-                                  color: _currentImageIndex == index
-                                      ? AppColors.primary
-                                      : Colors.grey.withAlpha(100),
-                                  borderRadius: BorderRadius.circular(3),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withAlpha(120),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(
+                                product.images.length,
+                                (index) => AnimatedContainer(
+                                  duration: const Duration(milliseconds: 250),
+                                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                                  width: _currentImageIndex == index ? 18 : 6,
+                                  height: 6,
+                                  decoration: BoxDecoration(
+                                    color: _currentImageIndex == index
+                                        ? Colors.white
+                                        : Colors.white.withAlpha(100),
+                                    borderRadius: BorderRadius.circular(3),
+                                  ),
                                 ),
                               ),
                             ),
@@ -209,7 +286,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                               fontWeight: FontWeight.w800,
                             ),
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 12),
 
                       // Rating Bar & Review count
                       Row(
@@ -231,7 +308,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                           ),
                           const SizedBox(width: 12),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
                               color: product.stock > 10 ? AppColors.success.withAlpha(25) : AppColors.warning.withAlpha(25),
                               borderRadius: BorderRadius.circular(6),
@@ -254,7 +331,10 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: isDark ? AppColors.darkCard : const Color(0xFFF1F5F9),
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                          ),
                         ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -272,7 +352,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                                     Text(
                                       '\$${product.discountedPrice.toStringAsFixed(2)}',
                                       style: TextStyle(
-                                        fontSize: 24,
+                                        fontSize: 26,
                                         fontWeight: FontWeight.w900,
                                         color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
                                       ),
@@ -295,9 +375,11 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                             const Spacer(),
                             if (product.discountPercentage > 0)
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                 decoration: BoxDecoration(
-                                  color: AppColors.error,
+                                  gradient: const LinearGradient(
+                                    colors: [AppColors.error, Color(0xFFFB7185)],
+                                  ),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Text(
@@ -311,6 +393,29 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                               ),
                           ],
                         ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Specifications & Highlights (Key Refinement)
+                      _buildSpecCard(
+                        icon: Icons.verified_user_outlined,
+                        title: 'Warranty',
+                        subtitle: product.warrantyInformation,
+                        isDark: isDark,
+                      ),
+                      const SizedBox(height: 10),
+                      _buildSpecCard(
+                        icon: Icons.local_shipping_outlined,
+                        title: 'Shipping',
+                        subtitle: product.shippingInformation,
+                        isDark: isDark,
+                      ),
+                      const SizedBox(height: 10),
+                      _buildSpecCard(
+                        icon: Icons.replay_circle_filled_outlined,
+                        title: 'Return Policy',
+                        subtitle: product.returnPolicy,
+                        isDark: isDark,
                       ),
                       const SizedBox(height: 24),
 
