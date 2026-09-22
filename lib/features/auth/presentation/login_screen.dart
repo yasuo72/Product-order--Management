@@ -194,18 +194,22 @@ class _LoginScreenState extends State<LoginScreen> {
                           children: [
                             Row(
                               children: [
-                                Icon(
+                                const Icon(
                                   Icons.info_outline_rounded,
                                   size: 18,
                                   color: AppColors.primaryLight,
                                 ),
                                 const SizedBox(width: 8),
-                                Text(
-                                  'Quick Test Accounts (Multi-User Demo)',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                    color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                Expanded(
+                                  child: Text(
+                                    'Quick Test Accounts (Multi-User Demo)',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                      color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                               ],

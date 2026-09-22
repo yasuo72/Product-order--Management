@@ -97,6 +97,24 @@ class StorageService {
     return _prefs.getBool(_keyDarkMode) ?? false;
   }
 
+  // --- Offline Product Caching ---
+  static const String _keyCachedProducts = 'cached_products';
+
+  Future<bool> saveCachedProducts(List<Map<String, dynamic>> products) async {
+    return await _prefs.setString(_keyCachedProducts, jsonEncode(products));
+  }
+
+  List<Map<String, dynamic>> getCachedProducts() {
+    final raw = _prefs.getString(_keyCachedProducts);
+    if (raw == null || raw.isEmpty) return [];
+    try {
+      final decoded = jsonDecode(raw) as List<dynamic>;
+      return decoded.map((e) => e as Map<String, dynamic>).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
   // Full Session Reset
   Future<void> clearSession() async {
     await clearToken();

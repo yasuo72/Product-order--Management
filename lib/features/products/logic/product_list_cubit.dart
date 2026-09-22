@@ -12,7 +12,19 @@ class ProductListCubit extends Cubit<ProductListState> {
   ProductListCubit(this._productRepository) : super(const ProductListState());
 
   Future<void> fetchInitial() async {
-    emit(state.copyWith(status: ProductListStatus.loading));
+    // 1. Immediately display cached products if available
+    final cached = _productRepository.getOfflineCachedProducts();
+    if (cached.isNotEmpty && state.products.isEmpty) {
+      emit(state.copyWith(
+        status: ProductListStatus.success,
+        products: cached,
+        total: cached.length,
+      ));
+    } else if (state.products.isEmpty) {
+      emit(state.copyWith(status: ProductListStatus.loading));
+    }
+
+    // 2. Fetch fresh catalog from network
     try {
       final categoriesFuture = _productRepository.getCategories();
       final productsFuture = _productRepository.getProducts(
@@ -37,11 +49,13 @@ class ProductListCubit extends Cubit<ProductListState> {
         errorMessage: null,
       ));
     } on AppException catch (e) {
+      if (state.products.isNotEmpty) return;
       emit(state.copyWith(
         status: ProductListStatus.failure,
         errorMessage: e.message,
       ));
     } catch (e) {
+      if (state.products.isNotEmpty) return;
       emit(state.copyWith(
         status: ProductListStatus.failure,
         errorMessage: 'Failed to load products: ${e.toString()}',

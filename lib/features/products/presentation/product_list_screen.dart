@@ -26,6 +26,12 @@ class _ProductListScreenState extends State<ProductListScreen> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final cubit = context.read<ProductListCubit>();
+      if (cubit.state.products.isEmpty && cubit.state.status != ProductListStatus.loading) {
+        cubit.fetchInitial();
+      }
+    });
   }
 
   void _onScroll() {

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import '../../../core/constants/api_endpoints.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/network_exceptions.dart';
+import '../../../core/services/storage_service.dart';
 import 'models/product_model.dart';
 
 class ProductsResult {
@@ -13,8 +14,18 @@ class ProductsResult {
 
 class ProductRepository {
   final ApiClient apiClient;
+  final StorageService? storageService;
 
-  ProductRepository({required this.apiClient});
+  ProductRepository({
+    required this.apiClient,
+    this.storageService,
+  });
+
+  List<ProductModel> getOfflineCachedProducts() {
+    if (storageService == null) return [];
+    final cached = storageService!.getCachedProducts();
+    return cached.map((item) => ProductModel.fromJson(item)).toList();
+  }
 
   Future<ProductsResult> getProducts({
     int limit = 10,
@@ -22,6 +33,10 @@ class ProductRepository {
     String? category,
     String? searchQuery,
   }) async {
+    final isDefaultCatalog = skip == 0 &&
+        (searchQuery == null || searchQuery.trim().isEmpty) &&
+        (category == null || category.isEmpty || category.toLowerCase() == 'all');
+
     try {
       String endpoint = ApiEndpoints.products;
       final Map<String, dynamic> queryParams = {
@@ -49,10 +64,30 @@ class ProductRepository {
           .map((item) => ProductModel.fromJson(item as Map<String, dynamic>))
           .toList();
 
+      // Cache default catalog for offline availability
+      if (isDefaultCatalog && storageService != null) {
+        await storageService!.saveCachedProducts(
+          products.map((p) => p.toJson()).toList(),
+        );
+      }
+
       return ProductsResult(products: products, total: total);
     } on DioException catch (e) {
+      // If network fails on default catalog, attempt to serve offline cache
+      if (isDefaultCatalog && storageService != null) {
+        final cached = getOfflineCachedProducts();
+        if (cached.isNotEmpty) {
+          return ProductsResult(products: cached, total: cached.length);
+        }
+      }
       throw AppException.fromDioException(e);
     } catch (e) {
+      if (isDefaultCatalog && storageService != null) {
+        final cached = getOfflineCachedProducts();
+        if (cached.isNotEmpty) {
+          return ProductsResult(products: cached, total: cached.length);
+        }
+      }
       if (e is AppException) rethrow;
       throw AppException('Failed to fetch products: ${e.toString()}');
     }

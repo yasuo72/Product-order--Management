@@ -50,9 +50,35 @@ class MyApp extends StatelessWidget {
         providers: [
           BlocProvider(create: (_) => ThemeCubit(storageService)),
           BlocProvider(create: (_) => AuthCubit(authRepository)..checkAuthStatus()),
-          BlocProvider(create: (_) => ProductListCubit(productRepository)),
-          BlocProvider(create: (_) => CartCubit(cartRepository)),
-          BlocProvider(create: (_) => WishlistCubit(wishlistRepository)),
+          BlocProvider(
+            create: (_) {
+              final cubit = ProductListCubit(productRepository);
+              if (authRepository.getCachedUser() != null) {
+                cubit.fetchInitial();
+              }
+              return cubit;
+            },
+          ),
+          BlocProvider(
+            create: (_) {
+              final cubit = CartCubit(cartRepository);
+              final user = authRepository.getCachedUser();
+              if (user != null) {
+                cubit.initializeForUser(user.username);
+              }
+              return cubit;
+            },
+          ),
+          BlocProvider(
+            create: (_) {
+              final cubit = WishlistCubit(wishlistRepository);
+              final user = authRepository.getCachedUser();
+              if (user != null) {
+                cubit.initializeForUser(user.username);
+              }
+              return cubit;
+            },
+          ),
           BlocProvider(
             create: (ctx) => CheckoutCubit(cartCubit: ctx.read<CartCubit>()),
           ),
@@ -79,7 +105,7 @@ class _AppView extends StatelessWidget {
           home: BlocConsumer<AuthCubit, AuthState>(
             listener: (context, state) {
               if (state is AuthAuthenticated) {
-                // Initialize user-isolated cart and wishlist for this specific logged-in user
+                // Initialize user-isolated cart, wishlist and catalog for this user
                 final user = state.user;
                 context.read<CartCubit>().initializeForUser(user.username);
                 context.read<WishlistCubit>().initializeForUser(user.username);
