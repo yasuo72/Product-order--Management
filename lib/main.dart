@@ -25,7 +25,10 @@ void main() async {
     apiClient: apiClient,
     storageService: storageService,
   );
-  final productRepository = ProductRepository(apiClient: apiClient);
+  final productRepository = ProductRepository(
+    apiClient: apiClient,
+    storageService: storageService,
+  );
   final cartRepository = CartRepository(storageService: storageService);
   final wishlistRepository = WishlistRepository(storageService: storageService);
 
