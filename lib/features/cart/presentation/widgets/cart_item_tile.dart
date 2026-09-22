@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/app_toast.dart';
@@ -171,6 +172,7 @@ class CartItemTile extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               constraints: const BoxConstraints(),
                               onPressed: () {
+                                HapticFeedback.selectionClick();
                                 context.read<CartCubit>().decrementQuantity(product.id);
                               },
                             ),
@@ -186,6 +188,7 @@ class CartItemTile extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               constraints: const BoxConstraints(),
                               onPressed: () {
+                                HapticFeedback.selectionClick();
                                 context.read<CartCubit>().incrementQuantity(product.id);
                               },
                             ),

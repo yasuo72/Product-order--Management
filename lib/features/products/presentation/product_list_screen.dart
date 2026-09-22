@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:product_order_app/core/constants/app_colors.dart';
 import 'package:product_order_app/core/services/connectivity_service.dart';
@@ -22,6 +24,8 @@ class ProductListScreen extends StatefulWidget {
 class _ProductListScreenState extends State<ProductListScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  bool _showCategories = true;
+  Timer? _scrollIdleTimer;
 
   @override
   void initState() {
@@ -48,8 +52,62 @@ class _ProductListScreenState extends State<ProductListScreen> {
     return currentScroll >= (maxScroll * 0.9);
   }
 
+  void _handleScrollNotification(ScrollNotification notification) {
+    if (notification is UserScrollNotification) {
+      if (notification.direction == ScrollDirection.reverse) {
+        // Scrolling down (top to bottom) -> hide category slider
+        _scrollIdleTimer?.cancel();
+        if (_showCategories) {
+          setState(() => _showCategories = false);
+        }
+      } else if (notification.direction == ScrollDirection.forward) {
+        // Reversing scroll (scrolling up) -> appear category slider again
+        _scrollIdleTimer?.cancel();
+        if (!_showCategories) {
+          setState(() => _showCategories = true);
+        }
+      } else if (notification.direction == ScrollDirection.idle) {
+        // Stopped scrolling -> appear category slider again
+        _scheduleShowCategories();
+      }
+    } else if (notification is ScrollEndNotification) {
+      // Stopped scrolling after fling -> appear category slider again
+      _scheduleShowCategories();
+    } else if (notification is ScrollUpdateNotification) {
+      if (notification.metrics.pixels <= 15) {
+        if (!_showCategories) {
+          setState(() => _showCategories = true);
+        }
+      } else if (notification.scrollDelta != null) {
+        if (notification.scrollDelta! > 10) {
+          // Scrolling down
+          _scrollIdleTimer?.cancel();
+          if (_showCategories) {
+            setState(() => _showCategories = false);
+          }
+        } else if (notification.scrollDelta! < -10) {
+          // Scrolling up / reversing
+          _scrollIdleTimer?.cancel();
+          if (!_showCategories) {
+            setState(() => _showCategories = true);
+          }
+        }
+      }
+    }
+  }
+
+  void _scheduleShowCategories() {
+    _scrollIdleTimer?.cancel();
+    _scrollIdleTimer = Timer(const Duration(milliseconds: 250), () {
+      if (mounted && !_showCategories) {
+        setState(() => _showCategories = true);
+      }
+    });
+  }
+
   @override
   void dispose() {
+    _scrollIdleTimer?.cancel();
     _searchController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -275,15 +333,27 @@ class _ProductListScreenState extends State<ProductListScreen> {
             ),
           ),
 
-          // Category Chips Bar
-          BlocBuilder<ProductListCubit, ProductListState>(
-            buildWhen: (prev, curr) =>
-                prev.categories != curr.categories ||
-                prev.selectedCategory != curr.selectedCategory,
-            builder: (context, state) {
-              return SizedBox(
-                height: 50,
-                child: ListView.separated(
+          // Collapsible Category Chips Bar (hides on scroll down, appears on stop / reverse)
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 280),
+            curve: Curves.easeInOutCubic,
+            height: _showCategories ? 50.0 : 0.0,
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 200),
+              opacity: _showCategories ? 1.0 : 0.0,
+              child: ClipRect(
+                child: OverflowBox(
+                  minHeight: 0,
+                  maxHeight: 50,
+                  alignment: Alignment.topCenter,
+                  child: BlocBuilder<ProductListCubit, ProductListState>(
+                    buildWhen: (prev, curr) =>
+                        prev.categories != curr.categories ||
+                        prev.selectedCategory != curr.selectedCategory,
+                    builder: (context, state) {
+                      return SizedBox(
+                        height: 50,
+                        child: ListView.separated(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   scrollDirection: Axis.horizontal,
                   itemCount: state.categories.length,
@@ -352,11 +422,23 @@ class _ProductListScreenState extends State<ProductListScreen> {
               );
             },
           ),
-          const SizedBox(height: 6),
+        ),
+      ),
+    ),
+  ),
+  AnimatedContainer(
+    duration: const Duration(milliseconds: 280),
+    height: _showCategories ? 6.0 : 0.0,
+  ),
 
-          // Main Product Grid / States
-          Expanded(
-            child: BlocBuilder<ProductListCubit, ProductListState>(
+  // Main Product Grid / States
+  Expanded(
+    child: NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        _handleScrollNotification(notification);
+        return false;
+      },
+      child: BlocBuilder<ProductListCubit, ProductListState>(
               builder: (context, state) {
                 if (state.status == ProductListStatus.loading && state.products.isEmpty) {
                   return const ProductGridSkeleton();
@@ -417,8 +499,9 @@ class _ProductListScreenState extends State<ProductListScreen> {
               },
             ),
           ),
-        ],
-      ),
-    );
+        ),
+      ],
+    ),
+  );
   }
 }

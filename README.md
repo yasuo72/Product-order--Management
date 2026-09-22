@@ -1,6 +1,6 @@
 # Product & Order Management App
 > A production-grade Flutter application built for **Indigital Technology** Technical Assessment.  
-> Demonstrates clean layered architecture, BLoC/Cubit state management, resilient networking with Dio interceptors, and strict **multi-user session & local storage isolation**.
+> Demonstrates clean layered architecture, BLoC/Cubit state management, resilient networking with Dio interceptors, modern customer-centric UI/UX polish, and strict **multi-user session & local storage isolation**.
 
 ---
 
@@ -12,17 +12,20 @@
 - **Session Persistence:** Securely persists JWT authentication token and user profile locally.
 - **Quick Test Accounts (Reviewer Feature):** One-tap credential chips on the login screen for `Emily Johnson (emilys)` and `Michael Williams (michaelw)` to evaluate multi-user flows in seconds.
 
-### 2. Product Browsing, Search & Filter (PDF 1)
+### 2. Product Browsing, Search & Dynamic UI (PDF 1)
 - **Product Catalog:** Consumes `GET https://dummyjson.com/products`.
 - **Live Search with Debounce:** Real-time 350ms debounced queries against `GET /products/search?q={query}`.
-- **Category Filter:** Dynamic horizontal category chips (`/products/categories` and `/products/category/{category}`).
+- **Auto-Collapsing Category Slider (Modern E-commerce UX):** Smoothly hides the horizontal category slider when scrolling down to maximize product viewing area, and automatically reveals it again when scrolling stops or reverses.
+- **Hero Image Transitions:** Smooth `Hero` animations connecting product card thumbnails in the catalog directly to the detail screen carousel.
+- **Skeleton Shimmer Loading:** Elegant shimmer placeholders during initial catalog loading.
 - **Pull-to-Refresh:** Pull down anytime to synchronize with the latest product catalog.
 - **Pagination (Bonus):** Infinite scroll listener dynamically loads batches of 10 items using `skip` and `limit`.
 
 ### 3. Product Details (PDF 1 & PDF 2)
 - Consumes `GET https://dummyjson.com/products/{id}`.
-- Interactive multi-image gallery with animated indicator dots.
+- Interactive multi-image gallery with animated indicator dots and shared element `Hero` transition.
 - Rating breakdown, stock status chip (`In Stock` / `Low Stock`), brand, category, price, and savings badge.
+- Specifications table: Warranty information, shipping terms, and return policy.
 - Dynamic bottom sheet with real-time "Add to Cart" and quantity steppers.
 
 ### 4. User-Isolated Cart Management (PDF 2 Mandate)
@@ -31,13 +34,14 @@
   - When **Michael** logs in, he sees only Michael's cart.
   - Data is never leaked or shared across accounts.
 - **Operations:** Add product, increment (+), decrement (-), remove item, and clear cart.
+- **Free Shipping Progress Tracker:** Visual progress indicator displaying amount remaining to unlock free shipping ($50 goal).
 - **Dynamic Totals:** Computes subtotal, total discount savings, delivery fee, and grand total.
 - **Persistence:** Retains full state across app termination and device restarts.
 
 ### 5. Dedicated User-Isolated Wishlist (PDF 2 Mandate)
 - Partitioned per user (`wishlist_user_${userId}`).
 - Instant heart toggle on product cards, details screen, and wishlist screen.
-- **"Move to Cart" Action:** Transfers items directly from Wishlist into Cart with a single tap.
+- **"Move to Cart" & "Move All" Actions:** Transfers items directly from Wishlist into Cart with a single tap.
 - Persistent across restarts.
 
 ### 6. Validated Checkout & Order Confirmation (PDF 1 & PDF 2)
@@ -47,11 +51,19 @@
   - Street Address (minimum 8 characters).
   - City (required).
   - Pincode (valid 6-digit numeric check).
+- **Interactive 3-Step Indicator:** Visual checkout progress (Shipping Address $\to$ Payment Method $\to$ Review & Pay).
 - **Payment Method Selection:** Cash on Delivery (COD), Instant UPI / QR, and Credit/Debit Card.
 - **Auto-Clearing Cart:** Immediately flushes the user's cart in memory and in local storage upon successful order placement.
-- **Order Success Screen:** Displays generated Order ID, delivery breakdown, timestamp, and "Continue Shopping" button.
+- **Order Success Receipt:** Displays animated checkmark, generated Order ID, delivery breakdown, timestamp, and "Continue Shopping" button.
 
-### 7. Bonus & Pro-Tier Polish
+### 7. Modern Customer-Comfort Feedback (`AppToast`)
+- **Tactile Haptic Feedback:** Physical confirmation via `HapticFeedback` on cart/wishlist additions and quantity changes.
+- **Product Thumbnail Preview:** Floating notification card showcasing the product image with a green checkmark badge overlay.
+- **Contextual Pricing & Copy:** Displays `"Added to Cart 🛒 • $12.99"` with the product title.
+- **Direct `"VIEW CART →"` Action Pill:** One-tap navigation straight to the Cart tab from any screen.
+- **`"UNDO"` on Swipe-to-Dismiss:** Immediate restoration if an item is swiped away by accident.
+
+### 8. Bonus & Pro-Tier Polish
 - **Dark Mode Support:** Material 3 Light & Dark mode switchable from the app bar with persisted user preference.
 - **Real-Time Connectivity Wrapper:** Live `connectivity_plus` listener displaying an offline status banner with a retry callback.
 - **Image Caching & Shimmer:** `cached_network_image` with smooth fallback icons.
@@ -83,9 +95,11 @@ lib/
 │   │   ├── app_theme.dart             # Material 3 light/dark ThemeData
 │   │   └── theme_cubit.dart           # Theme mode state management
 │   └── widgets/
+│       ├── app_toast.dart             # Customer-comfort floating notifications
 │       ├── connectivity_banner.dart   # Offline status banner with retry
 │       ├── empty_state_view.dart      # Clean graphic for empty lists
 │       ├── error_state_view.dart      # Reusable error card with retry
+│       ├── shimmer_placeholder.dart   # Skeleton shimmer for product grid
 │       ├── custom_button.dart         # Button with progress spinner
 │       └── custom_text_field.dart     # Input field with validation styling
 └── features/
@@ -158,8 +172,9 @@ flutter run
 ```bash
 flutter build apk --release
 ```
-The output APK will be generated at:
-`build/app/outputs/flutter-apk/app-release.apk`
+The output APK is available at:
+- `build/app/outputs/flutter-apk/app-release.apk`
+- `app-release.apk` *(conveniently mirrored at project root)*
 
 ---
 
@@ -189,3 +204,5 @@ The output APK will be generated at:
   *By partitioning local keys as `cart_user_{username}` and `wishlist_user_{username}`. If User A logs in and adds items, logging out and logging in as User B starts with an empty cart. When User A logs back in, User A's exact items are restored.*
 - **How is Offline Mode handled?**  
   *A `ConnectivityService` emits real-time connectivity changes. The `ConnectivityBanner` informs the user immediately, while `cached_network_image` continues serving cached thumbnails.*
+- **How is UI/UX Elevated Beyond Standard Flutter?**  
+  *Features like the auto-collapsing category slider on scroll, shared element `Hero` image transitions, skeleton shimmer loaders, free shipping progress tracker, and `AppToast` with tactile haptic feedback elevate the app to commercial e-commerce standards.*

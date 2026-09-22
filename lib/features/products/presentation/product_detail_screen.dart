@@ -201,19 +201,27 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                           final imgUrl = product.images.isNotEmpty
                               ? product.images[index]
                               : product.thumbnail;
+
+                          final imageWidget = CachedNetworkImage(
+                            imageUrl: imgUrl,
+                            fit: BoxFit.contain,
+                            placeholder: (context, url) => const Center(
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                            errorWidget: (context, url, error) => const Center(
+                              child: Icon(Icons.broken_image_outlined, size: 48, color: Colors.grey),
+                            ),
+                          );
+
                           return Container(
                             color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
                             padding: const EdgeInsets.all(16),
-                            child: CachedNetworkImage(
-                              imageUrl: imgUrl,
-                              fit: BoxFit.contain,
-                              placeholder: (context, url) => const Center(
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              ),
-                              errorWidget: (context, url, error) => const Center(
-                                child: Icon(Icons.broken_image_outlined, size: 48, color: Colors.grey),
-                              ),
-                            ),
+                            child: index == 0
+                                ? Hero(
+                                    tag: 'product_img_${product.id}',
+                                    child: imageWidget,
+                                  )
+                                : imageWidget,
                           );
                         },
                       ),

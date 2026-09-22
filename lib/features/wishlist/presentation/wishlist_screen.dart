@@ -232,7 +232,7 @@ class WishlistScreen extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 8),
 
-                                    // Move to Cart CTA
+                                    // Move to Cart & Remove CTA
                                     Row(
                                       children: [
                                         ElevatedButton.icon(
@@ -254,6 +254,19 @@ class WishlistScreen extends StatelessWidget {
                                             visualDensity: VisualDensity.compact,
                                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                           ),
+                                        ),
+                                        const Spacer(),
+                                        IconButton(
+                                          icon: const Icon(Icons.delete_outline_rounded, size: 18, color: Colors.grey),
+                                          tooltip: 'Remove',
+                                          onPressed: () {
+                                            context.read<WishlistCubit>().removeFromWishlist(product.id);
+                                            AppToast.showWishlist(
+                                              context: context,
+                                              product: product,
+                                              isAdded: false,
+                                            );
+                                          },
                                         ),
                                       ],
                                     ),

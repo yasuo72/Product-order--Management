@@ -40,9 +40,9 @@ class ProductCard extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withAlpha(10),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: isDark ? Colors.black.withAlpha(50) : const Color(0xFF1E293B).withAlpha(15),
+              blurRadius: 16,
+              offset: const Offset(0, 5),
             ),
           ],
         ),
@@ -82,23 +82,35 @@ class ProductCard extends StatelessWidget {
                     ),
                   ),
 
-                  // Discount Badge
+                  // Discount Badge with vibrant gradient
                   if (product.discountPercentage > 0)
                     Positioned(
                       top: 8,
                       left: 8,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
                         decoration: BoxDecoration(
-                          color: AppColors.error,
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFFF3366), Color(0xFFFF6584)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
                           borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFFFF3366).withAlpha(80),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
                         child: Text(
                           '-${product.discountPercentage.round()}%',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 10,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.2,
                           ),
                         ),
                       ),
@@ -168,19 +180,27 @@ class ProductCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                      Row(
-                        children: [
-                          const Icon(Icons.star_rounded, size: 14, color: AppColors.accent),
-                          const SizedBox(width: 2),
-                          Text(
-                            product.rating.toStringAsFixed(1),
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.accent.withAlpha(25),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.star_rounded, size: 13, color: AppColors.accent),
+                            const SizedBox(width: 2),
+                            Text(
+                              product.rating.toStringAsFixed(1),
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w800,
+                                color: isDark ? const Color(0xFFFCD34D) : const Color(0xFFB45309),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -197,6 +217,17 @@ class ProductCard extends StatelessWidget {
                       color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
                     ),
                   ),
+                  if (product.stock <= 5) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      'Only ${product.stock} left in stock!',
+                      style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFFE11D48),
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 8),
 
                   // Price & Quick Add Button
@@ -245,8 +276,17 @@ class ProductCard extends StatelessWidget {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                               decoration: BoxDecoration(
-                                color: inCart ? AppColors.success : AppColors.primary,
+                                gradient: inCart
+                                    ? const LinearGradient(colors: [Color(0xFF10B981), Color(0xFF059669)])
+                                    : const LinearGradient(colors: [AppColors.primary, AppColors.primaryLight]),
                                 borderRadius: BorderRadius.circular(10),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: (inCart ? AppColors.success : AppColors.primary).withAlpha(60),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
