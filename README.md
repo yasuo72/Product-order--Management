@@ -196,13 +196,3 @@ The output APK is available at:
 
 ---
 
-## 🎯 Candidate Interview Talking Points
-
-- **Why Cubit over full BLoC?**  
-  *Cubit eliminates event boilerplate while retaining state immutability, stream streams, and testability. For CRUD operations like cart, wishlist, and auth status, Cubits are lighter, cleaner, and faster to comprehend.*
-- **How was Multi-User Isolation verified?**  
-  *By partitioning local keys as `cart_user_{username}` and `wishlist_user_{username}`. If User A logs in and adds items, logging out and logging in as User B starts with an empty cart. When User A logs back in, User A's exact items are restored.*
-- **How is Offline Mode handled?**  
-  *A `ConnectivityService` emits real-time connectivity changes. The `ConnectivityBanner` informs the user immediately, while `cached_network_image` continues serving cached thumbnails.*
-- **How is UI/UX Elevated Beyond Standard Flutter?**  
-  *Features like the auto-collapsing category slider on scroll, shared element `Hero` image transitions, skeleton shimmer loaders, free shipping progress tracker, and `AppToast` with tactile haptic feedback elevate the app to commercial e-commerce standards.*
