@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/constants/api_endpoints.dart';
+import '../../../core/database/app_database.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/network_exceptions.dart';
 import '../../../core/services/storage_service.dart';
@@ -15,10 +16,12 @@ class ProductsResult {
 class ProductRepository {
   final ApiClient apiClient;
   final StorageService? storageService;
+  final AppDatabase? database;
 
   ProductRepository({
     required this.apiClient,
     this.storageService,
+    this.database,
   });
 
   List<ProductModel> getOfflineCachedProducts() {
@@ -65,10 +68,15 @@ class ProductRepository {
           .toList();
 
       // Cache default catalog for offline availability
-      if (isDefaultCatalog && storageService != null) {
-        await storageService!.saveCachedProducts(
-          products.map((p) => p.toJson()).toList(),
-        );
+      if (isDefaultCatalog) {
+        if (storageService != null) {
+          await storageService!.saveCachedProducts(
+            products.map((p) => p.toJson()).toList(),
+          );
+        }
+        // Also persist to SQLite database
+        final db = database ?? AppDatabase.instance;
+        await db.insertOrUpdateProducts(products);
       }
 
       return ProductsResult(products: products, total: total);

@@ -12,6 +12,7 @@ import 'package:product_order_app/core/widgets/shimmer_placeholder.dart';
 import 'package:product_order_app/features/auth/logic/auth_cubit.dart';
 import 'package:product_order_app/features/products/logic/product_list_cubit.dart';
 import 'package:product_order_app/features/products/logic/product_list_state.dart';
+import 'package:product_order_app/core/database/sqlite_inspector_dialog.dart';
 import 'widgets/product_card.dart';
 
 class ProductListScreen extends StatefulWidget {
@@ -198,6 +199,25 @@ class _ProductListScreenState extends State<ProductListScreen> {
           ],
         ),
         actions: [
+          IconButton(
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: (isDark ? AppColors.darkCard : Colors.white),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                ),
+              ),
+              child: const Icon(
+                Icons.storage_rounded,
+                size: 18,
+                color: AppColors.primary,
+              ),
+            ),
+            tooltip: 'SQLite DB Inspector',
+            onPressed: () => SqliteInspectorDialog.show(context),
+          ),
           IconButton(
             icon: Container(
               padding: const EdgeInsets.all(6),
