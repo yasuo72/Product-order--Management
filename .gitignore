@@ -47,7 +47,10 @@ app.*.map.json
 # Built APKs
 *.apk
 .kotlin/
+note app/
 
 # Private local notes
 INTERVIEW_GUIDE_HINGLISH.md
 
+# Widget Preview related
+.widget_preview/
